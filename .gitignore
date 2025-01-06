@@ -1,0 +1,14 @@
+/PaperScraper.iml
+/src/paper_scraper/agent/training/
+/.env
+/.python-version
+/.idea/
+/.venv/
+/dataset/
+/docker/
+/old_src/
+__pycache__
+.python-version
+/htmlcov/
+/dist/
+.coverage
