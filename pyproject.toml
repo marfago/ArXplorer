@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "arxplorer"
-version = "0.1.0"
+version = "0.1.1"
 description = "An advanced system for searching, retrieving, and analyzing academic papers from arXiv using AI-powered agents."
 authors = ["Marco Fago <fago.marco.ai@gmail.com>"]
 readme = "README.md"
