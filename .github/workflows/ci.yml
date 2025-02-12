@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/arxplorer  # Replace with your package name
+      url: https://pypi.org/project/arxplorer
     permissions:
       id-token: write
 
@@ -164,7 +164,7 @@ jobs:
 
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/arxplorer  # Replace with your package name
+      url: https://test.pypi.org/project/arxplorer
 
     permissions:
       id-token: write
