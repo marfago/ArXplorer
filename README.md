@@ -25,15 +25,16 @@ powerful tool for literature review and discovery.
 pip install arxplorer
 ```
 
-2. Set up the Google Gemini API key:
+2. Set up the Google Gemini API key and/or Groq API key:
 
-   You need to set the GEMINI_API_KEY as an environment variable. Follow the instructions for your operating system:
+   You need to set the GEMINI_API_KEY and/or GROQ_API_KEY as environment variables. Follow the instructions for your operating system:
 
    ### Windows:
 
    Open Command Prompt and run:
    ```
    setx GEMINI_API_KEY "your_gemini_api_key_here"
+   setx GROQ_API_KEY "your_groq_api_key_here"
    ```
    Close and reopen Command Prompt for the changes to take effect.
 
@@ -42,6 +43,7 @@ pip install arxplorer
    Add the following line to your shell configuration file (e.g., `~/.bash_profile`, `~/.bashrc`, or `~/.zshrc`):
    ```
    export GEMINI_API_KEY="your_gemini_api_key_here"
+   export GROQ_API_KEY="your_groq_api_key_here"
    ```
    Then, either restart your terminal or run:
    ```
@@ -56,10 +58,18 @@ pip install arxplorer
      ```
      echo %GEMINI_API_KEY%
      ```
+     or
+     ```
+     echo %GROQ_API_KEY%
+     ```
 
    - On macOS and Linux:
      ```
      echo $GEMINI_API_KEY
+     ```
+     or
+     ```
+     echo $GROQ_API_KEY$
      ```
 
    This should display your API key.

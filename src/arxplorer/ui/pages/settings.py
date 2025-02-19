@@ -18,17 +18,41 @@ def create_setting_row(label, id, value, input_type="text", disabled=False):
 
 
 llm_model_options = {
-    "gemini/gemini-2.0-flash": "Gemini 2.0 Flash",
-    "gemini/gemini-2.0-flash-lite-preview-02-05": "Gemini 2.0 Flash-Lite Preview",
-    "gemini/gemini-1.5-flash": "Gemini 1.5 Flash",
-    "gemini/gemini-1.5-flash-8b": "Gemini 1.5 Flash-8B",
-    "gemini/gemini-1.5-pro": "Gemini 1.5 Pro",
+    "gemini": {
+        "gemini/gemini-2.0-flash": "Gemini 2.0 Flash",
+        "gemini/gemini-2.0-flash-lite-preview-02-05": "Gemini 2.0 Flash-Lite Preview",
+        "gemini/gemini-1.5-flash": "Gemini 1.5 Flash",
+        "gemini/gemini-1.5-flash-8b": "Gemini 1.5 Flash-8B",
+        "gemini/gemini-1.5-pro": "Gemini 1.5 Pro",
+    },
+    "groq": {
+        "groq/llama-3.3-70b-versatile": "LLaMA 3.3 70B Versatile (free)",
+        "groq/llama-3.1-8b-instant": "LLaMA 3.1 8B Instant (free)",
+        "groq/qwen-2.5-32b": "Qwen 2.5 32B (free)",
+        "groq/deepseek-r1-distill-qwen-32b": "DeepSeek R1 Distill Qwen 32B (free)",
+        "groq/deepseek-r1-distill-llama-70b-specdec": "DeepSeek R1 Distill LLaMA 70B SpecDec (free)",
+        "groq/deepseek-r1-distill-llama-70b": "DeepSeek R1 Distill LLaMA 70B (free)",
+        "groq/llama-3.2-1b-preview": "LLaMA 3.2 1B Preview (free)",
+        "groq/llama-3.2-3b-preview": "LLaMA 3.2 3B Preview (free)",
+        "groq/llama-3.2-11b-vision-preview": "LLaMA 3.2 11B Vision Preview (free)",
+        "groq/llama-3.2-90b-vision-preview": "LLaMA 3.2 90B Vision Preview (free)",
+    },
 }
 
 retry_strategy_options = [
     {"label": "Exponential backoff", "value": "exponential_backoff_retry"},
-    # Add other retry strategies here if needed
 ]
+
+log_level_options = [
+    {"label": "CRITICAL", "value": "CRITICAL"},
+    {"label": "ERROR", "value": "ERROR"},
+    {"label": "WARNING", "value": "WARNING"},
+    {"label": "INFO", "value": "INFO"},
+    {"label": "DEBUG", "value": "DEBUG"},
+    {"label": "NOTSET", "value": "NOTSET"},
+]
+
+max_tokens_options = {4096: "4,096 tokens", 8192: "8,192 tokens", 16384: "16,384 tokens", 32768: "32,768 tokens"}
 
 layout = html.Div(
     [
@@ -87,8 +111,35 @@ layout = html.Div(
                         dbc.Col(
                             dcc.Dropdown(
                                 id="llm-model",
-                                options=[{"label": v, "value": k} for k, v in llm_model_options.items()],
+                                options=[
+                                    {
+                                        "label": v,
+                                        "value": k,
+                                        "disabled": not ConfigurationManager.is_google_gemini_key_available(),
+                                    }
+                                    for k, v in llm_model_options["gemini"].items()
+                                ]
+                                + [
+                                    {"label": v, "value": k, "disabled": not ConfigurationManager.is_groq_key_available()}
+                                    for k, v in llm_model_options["groq"].items()
+                                ],
                                 value=ConfigurationManager.get_llm_model(),
+                                clearable=False,
+                                optionHeight=35,
+                            ),
+                            width=8,
+                        ),
+                    ],
+                    className="mb-3",
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(html.Label("Max Tokens"), width=4),
+                        dbc.Col(
+                            dcc.Dropdown(
+                                id="max-tokens",
+                                options=[{"label": v, "value": k} for k, v in max_tokens_options.items()],
+                                value=ConfigurationManager.get_max_tokens(),
                                 clearable=False,
                             ),
                             width=8,
@@ -116,17 +167,38 @@ layout = html.Div(
                 ),
                 dbc.Row(
                     [
-                        dbc.Col(html.Label("Google API Key"), width=4),
+                        dbc.Col(html.Label("Log Level"), width=4),
+                        dbc.Col(
+                            dcc.Dropdown(
+                                id="log-level",
+                                options=log_level_options,
+                                value=ConfigurationManager.get_config().get("log_level", "ERROR"),
+                                clearable=False,
+                            ),
+                            width=8,
+                        ),
+                    ],
+                    className="mb-3",
+                ),
+                dbc.Row(
+                    [
+                        dbc.Col(html.Label("Available providers:"), width=4),
                         dbc.Col(
                             [
-                                html.Span(
-                                    "Available" if ConfigurationManager.is_google_gemini_key_available() else "Not Available"
-                                ),
+                                html.Span("Google Gemini", className="me-2"),
                                 html.I(
                                     className=(
-                                        "fas fa-check-circle text-success ms-2"
+                                        "fas fa-check-circle text-success"
                                         if ConfigurationManager.is_google_gemini_key_available()
-                                        else "fas fa-times-circle text-danger ms-2"
+                                        else "fas fa-times-circle text-danger"
+                                    )
+                                ),
+                                html.Span("Groq", className="ms-4 me-2"),
+                                html.I(
+                                    className=(
+                                        "fas fa-check-circle text-success"
+                                        if ConfigurationManager.is_groq_key_available()
+                                        else "fas fa-times-circle text-danger"
                                     )
                                 ),
                             ],
@@ -168,6 +240,8 @@ layout = html.Div(
             "llm-model",
             "llm-retry-strategy",
             "llm-max-retries",
+            "log-level",
+            "max-tokens",
         ]
     ],
     [Input("save-settings", "n_clicks"), Input("close-modal", "n_clicks")],
@@ -181,6 +255,8 @@ layout = html.Div(
             "llm-model",
             "llm-retry-strategy",
             "llm-max-retries",
+            "log-level",
+            "max-tokens",
         ]
     ],
 )
@@ -194,10 +270,12 @@ def save_settings(
     llm_model,
     llm_retry_strategy,
     llm_max_retries,
+    log_level,
+    max_tokens,
 ):
     ctx = dash.callback_context
     if not ctx.triggered:
-        return False, dash.no_update, *[dash.no_update] * 7
+        return False, dash.no_update, *[dash.no_update] * 9
 
     button_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -209,8 +287,10 @@ def save_settings(
         ConfigurationManager.update_config("llm_model", llm_model)
         ConfigurationManager.update_config("llm_client_retry_strategy", llm_retry_strategy)
         ConfigurationManager.update_config("llm_client_max_num_retries", int(llm_max_retries))
-        return True, "/", *[dash.no_update] * 7
+        ConfigurationManager.update_config("log_level", log_level)
+        ConfigurationManager.update_config("max_tokens", int(max_tokens))
+        return True, "/", *[dash.no_update] * 9
     elif button_id == "close-modal":
-        return False, "/", *[dash.no_update] * 7
+        return False, "/", *[dash.no_update] * 9
 
-    return False, dash.no_update, *[dash.no_update] * 7
+    return False, dash.no_update, *[dash.no_update] * 9
