@@ -1,62 +1,50 @@
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Dict, Any
 
-from arxplorer.common.common import load_env
-
-ARXPLORER_NAME: str = "arxplorer"
-ARXPLORER_FOLDER: str = f".{ARXPLORER_NAME}"
-ARXPLORER_DB_NAME: str = f"{ARXPLORER_NAME}_db.sqlite"
-
-load_env()
-
-
-def _get_or_create_folder(home: str, *folders: str) -> str:
-    """Return the path to the PDF folder."""
-    path = os.path.join(home, *folders)
-    os.makedirs(path, exist_ok=True)
-    return path
-
-
-def _dump(configuration, config_file):
-    with open(config_file, "w") as cf:
-        json.dump(configuration, cf, indent=2)
+ARXPLORER_FOLDER = ".arxplorer"
 
 
 class ConfigurationManager:
-    CONFIG_FILE = Path.home() / ARXPLORER_FOLDER / "config.json"
+    DEFAULT_CONFIG_FILE = Path.home() / ARXPLORER_FOLDER / "config.json"
+
+    @classmethod
+    def get_config_file(cls):
+        return Path(os.environ.get("ARXPLORER_CONFIG_FILE", cls.DEFAULT_CONFIG_FILE))
 
     @classmethod
     def get_config(cls) -> Dict[str, Any]:
-        """
-        Get the configuration. If the config file doesn't exist, create it with default values.
-        """
-        if not cls.CONFIG_FILE.exists():
+        config_file = cls.get_config_file()
+        if not config_file.exists():
             default_configuration = {
-                "application_folder": _get_or_create_folder(str(Path.home()), ARXPLORER_FOLDER),
+                "application_folder": str(Path.home() / ARXPLORER_FOLDER),
                 "conversion_speed": "fast",
                 "max_parallel_tasks": 10,
                 "max_parallel_convert_processes": 2,
                 "llm_model": "gemini/gemini-2.0-flash",
+                "max_tokens": 8192,
                 "llm_client_retry_strategy": "exponential_backoff_retry",
                 "llm_client_max_num_retries": 10,
                 "max_queries_per_minute": 15,
+                "log_level": "ERROR",
             }
-            cls.CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
-            _dump(default_configuration, cls.CONFIG_FILE)
+            config_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(config_file, "w") as cf:
+                json.dump(default_configuration, cf, indent=2)
+            return default_configuration
 
-        with open(cls.CONFIG_FILE, "r") as config_file:
+        with open(config_file, "r") as config_file:
             return json.load(config_file)
 
     @classmethod
     def update_config(cls, key: str, value: Any):
-        """
-        Update a specific configuration value.
-        """
+        config_file = cls.get_config_file()
         configuration = cls.get_config()
         configuration[key] = value
-        _dump(configuration, cls.CONFIG_FILE)
+        with open(config_file, "w") as cf:
+            json.dump(configuration, cf, indent=2)
 
     @classmethod
     def get_application_folder(cls) -> str:
@@ -64,7 +52,7 @@ class ConfigurationManager:
 
     @classmethod
     def get_cache_folder(cls) -> str:
-        return _get_or_create_folder(cls.get_application_folder(), "cache")
+        return os.path.join(cls.get_application_folder(), "cache")
 
     @classmethod
     def is_fast_conversion(cls) -> bool:
@@ -72,11 +60,15 @@ class ConfigurationManager:
 
     @classmethod
     def get_db_name(cls) -> str:
-        return os.path.join(cls.get_application_folder(), f"{ARXPLORER_DB_NAME}.sqlite")
+        return os.path.join(cls.get_application_folder(), "arxplorer_db.sqlite")
 
     @classmethod
     def get_llm_model(cls) -> str:
         return cls.get_config().get("llm_model", "gemini/gemini-2.0-flash")
+
+    @classmethod
+    def get_max_tokens(cls) -> int:
+        return cls.get_config().get("max_tokens", 8192)
 
     @classmethod
     def get_max_parallel_tasks(cls) -> int:
@@ -108,4 +100,16 @@ class ConfigurationManager:
 
     @classmethod
     def is_google_gemini_key_available(cls):
-        return os.getenv("GEMINI_API_KEY")
+        return os.getenv("GEMINI_API_KEY") is not None
+
+    @classmethod
+    def is_groq_key_available(cls):
+        return os.getenv("GROQ_API_KEY") is not None
+
+    @classmethod
+    def is_any_key_available(cls):
+        return any([cls.is_groq_key_available(), cls.is_google_gemini_key_available()])
+
+    @classmethod
+    def get_log_level(cls) -> int:
+        return logging.getLevelNamesMapping()[cls.get_config().get("log_level", "ERROR")]

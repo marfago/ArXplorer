@@ -88,20 +88,17 @@ class ArxivReferencesGenerator(dspy.Signature):
 
 
 class ArxivReferenceExtractor(dspy.Module):
-    def __init__(
-        self,
-        llm_model: str,
-        num_retries: int,
-    ):
+    def __init__(self, llm_model: str, num_retries: int, max_tokens: int):
         super().__init__()
         self.llm_model = llm_model
         self.predictor = dspy.Predict(ArxivReferencesGenerator)
         self.num_retries = num_retries
+        self.max_tokens = max_tokens
 
-    def forward(self, paper: str, query: str, temperature=0, max_tokens=200_000) -> list[ArxivReference]:
+    def forward(self, paper: str, query: str, temperature=0) -> list[ArxivReference]:
         lm = dspy.LM(
             model=self.llm_model,
-            max_tokens=max_tokens,
+            max_tokens=self.max_tokens,
             num_retries=self.num_retries,
             retry_strategy=ConfigurationManager.get_llm_client_retry_strategy(),
         )
