@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from pathlib import Path
 from typing import Dict, Any
@@ -9,6 +8,10 @@ ARXPLORER_FOLDER = ".arxplorer"
 
 class ConfigurationManager:
     DEFAULT_CONFIG_FILE = Path.home() / ARXPLORER_FOLDER / "config.json"
+
+    @classmethod
+    def _get_level_names_mapping(cls):
+        return {"CRITICAL": 50, "ERROR": 40, "WARNING": 30, "INFO": 20, "DEBUG": 10, "NOTSET": 0}
 
     @classmethod
     def get_config_file(cls):
@@ -112,4 +115,5 @@ class ConfigurationManager:
 
     @classmethod
     def get_log_level(cls) -> int:
-        return logging.getLevelNamesMapping()[cls.get_config().get("log_level", "ERROR")]
+        level_name = cls.get_config().get("log_level", "ERROR")
+        return cls._get_level_names_mapping().get(level_name, 40)  # Default to ERROR (40) if not found

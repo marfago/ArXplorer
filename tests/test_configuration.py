@@ -1,8 +1,7 @@
-import unittest
-from unittest.mock import patch, mock_open, call
-import json
 import os
+import unittest
 from pathlib import Path
+from unittest.mock import patch, mock_open
 
 from arxplorer.configuration import ConfigurationManager, ARXPLORER_FOLDER
 
@@ -143,10 +142,21 @@ class TestConfigurationManager(unittest.TestCase):
         self.assertFalse(ConfigurationManager.is_any_key_available())
 
     def test_get_log_level(self):
-        with patch.object(ConfigurationManager, "get_config", return_value={"log_level": "DEBUG"}):
-            self.assertEqual(ConfigurationManager.get_log_level(), 10)  # DEBUG level is 10
-        with patch.object(ConfigurationManager, "get_config", return_value={"log_level": "ERROR"}):
-            self.assertEqual(ConfigurationManager.get_log_level(), 40)  # ERROR level is 40
+        test_cases = [
+            ("DEBUG", 10),
+            ("INFO", 20),
+            ("WARNING", 30),
+            ("ERROR", 40),
+            ("CRITICAL", 50),
+            ("INVALID", 40),  # Should default to ERROR
+            (None, 40),  # Should default to ERROR when no log_level is set
+        ]
+
+        for log_level, expected_value in test_cases:
+            with self.subTest(log_level=log_level):
+                config = {"log_level": log_level} if log_level is not None else {}
+                with patch.object(ConfigurationManager, "get_config", return_value=config):
+                    self.assertEqual(ConfigurationManager.get_log_level(), expected_value)
 
 
 if __name__ == "__main__":
