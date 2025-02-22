@@ -124,24 +124,22 @@ class ArxivAssessor(dspy.Module):
         num_retries (int): The number of times to retry failed API calls.
     """
 
-    def __init__(
-        self,
-        llm_model: str,
-        num_retries: int,
-    ):
+    def __init__(self, llm_model: str, num_retries: int, max_tokens: int):
         """
         Initialize the ArxivAssessor.
 
         Args:
             llm_model (str): The name of the language model to use.
             num_retries (int): The number of times to retry failed API calls.
+            max_tokens (int): The maximum number of tokens for the language model output.
         """
         super().__init__()
         self.llm_model = llm_model
         self.predictor = dspy.Predict(PaperAssessmentGenerator)
         self.num_retries = num_retries
+        self.max_tokens = max_tokens
 
-    def forward(self, paper: str, query: str, temperature=0, max_tokens=200_000) -> ArxivRelevanceAssessment:
+    def forward(self, paper: str, query: str, temperature=0) -> ArxivRelevanceAssessment:
         """
         Generate a relevance assessment for a given paper and query.
 
@@ -149,14 +147,13 @@ class ArxivAssessor(dspy.Module):
             paper (str): The content of the paper to assess.
             query (str): The query to assess the paper against.
             temperature (float): The temperature parameter for the language model.
-            max_tokens (int): The maximum number of tokens for the language model output.
 
         Returns:
             ArxivRelevanceAssessment: The generated relevance assessment.
         """
         lm = dspy.LM(
             model=self.llm_model,
-            max_tokens=max_tokens,
+            max_tokens=self.max_tokens,
             num_retries=self.num_retries,
             retry_strategy=ConfigurationManager.get_llm_client_max_num_retries(),
         )

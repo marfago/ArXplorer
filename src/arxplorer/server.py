@@ -7,7 +7,8 @@ import dspy  # DSPy has a weird bound to the main thread. Assertions will not wo
 from waitress.server import create_server
 
 from arxplorer.agent.orchestrator import Orchestrator
-from arxplorer.common.common import configure_logging
+from arxplorer.common.common import configure_logging, instrument_telemetry
+from arxplorer.configuration import ConfigurationManager
 from arxplorer.persitence.database import DbOperations
 from arxplorer.ui.dash_app import app
 
@@ -35,7 +36,14 @@ class ArXplorerServer:
         self._orchestrator.start()
 
     def start(self):
-        configure_logging()
+        instrument_telemetry()
+        configure_logging(level=ConfigurationManager.get_log_level())
+
+        if not ConfigurationManager.is_any_key_available():
+            print(
+                """\nNo api keys found.\nPlease refer to https://github.com/marfago/ArXplorer/blob/main/README.md#installation."""
+            )
+            sys.exit(-1)
 
         signal.signal(signal.SIGINT, self.signal_handler)
 
