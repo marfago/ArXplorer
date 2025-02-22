@@ -144,13 +144,19 @@ class ArxivQueryAgent:
             converter=(html_converter if ConfigurationManager.is_fast_conversion() else pdf_converter),
         )
         self._query_searcher = ArxivSearcher(
-            llm_model=self._llm_model, num_retries=ConfigurationManager.get_llm_client_max_num_retries()
+            llm_model=self._llm_model,
+            num_retries=ConfigurationManager.get_llm_client_max_num_retries(),
+            max_tokens=ConfigurationManager.get_max_tokens(),
         )
         self._reference_extractor = ArxivReferenceExtractor(
-            llm_model=self._llm_model, num_retries=ConfigurationManager.get_llm_client_max_num_retries()
+            llm_model=self._llm_model,
+            num_retries=ConfigurationManager.get_llm_client_max_num_retries(),
+            max_tokens=ConfigurationManager.get_max_tokens(),
         )
         self._assessor = ArxivAssessor(
-            llm_model=self._llm_model, num_retries=ConfigurationManager.get_llm_client_max_num_retries()
+            llm_model=self._llm_model,
+            num_retries=ConfigurationManager.get_llm_client_max_num_retries(),
+            max_tokens=ConfigurationManager.get_max_tokens(),
         )
 
     @catch_errors()
@@ -161,7 +167,7 @@ class ArxivQueryAgent:
         Args:
             user_query (str): The user's search query.
         """
-        papers: list[ArxivPaper] = self._query_searcher(user_query=user_query, temperature=0, max_results=300)
+        papers: list[ArxivPaper] = self._query_searcher(user_query=user_query, max_results=300)
         for paper in papers:
             self._logger.info(f"Adding a retrieve task for paper {paper}")
             self._thread_executor.create_thread(self._retrieve_papers, 1, 3, paper.paper_id, user_query)

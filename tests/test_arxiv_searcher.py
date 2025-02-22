@@ -19,7 +19,7 @@ def arxiv_searcher():
         mock_predictor.return_value = Mock(arxiv_query="mocked_query")
         mock_predict.return_value = mock_predictor
 
-        yield ArxivSearcher(llm_model="mock_model", num_retries=3)
+        yield ArxivSearcher(llm_model="mock_model", num_retries=3, max_tokens=8192)
 
 
 @pytest.fixture
