@@ -17,6 +17,13 @@ powerful tool for literature review and discovery.
 - Data Persistence and Management
 - User-friendly Interface
 
+![alt text](images/query.png "Query section") 
+
+![alt text](images/results.png "Results section")
+
+![alt text](images/details-section.png "Details section")
+
+
 ## Installation
 
 1. Install ArXplorer using pip:
@@ -81,7 +88,7 @@ pip install arxplorer
    arxplorer
    ```
 
-   This will start the ArXplorer server. By default, it runs on `0.0.0.0:6007`, which means it's accessible from any IP
+   This will start the ArXplorer server. By default, it runs on `127.0.0.1:6007:6007`, which means it's accessible from any IP
    address on port 6007.
 
 2. Access the ArXplorer interface by opening a web browser and navigating to:
