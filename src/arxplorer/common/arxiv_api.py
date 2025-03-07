@@ -173,7 +173,7 @@ class ArxivCrawler:
         }
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     logging.basicConfig(level=logging.DEBUG)
     docs = ArxivCrawler().search(
         'cat:(cs.LG OR cs.AI OR cs.CC) AND (abs:"neural network" AND (abs:"self-confidence" OR abs:"calibration"))',

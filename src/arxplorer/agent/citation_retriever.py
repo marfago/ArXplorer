@@ -98,7 +98,7 @@ class CitationsRetriever:
         self._stop_event.set()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     logging.basicConfig(level=logging.INFO)
     c = CitationsRetriever(sleep_time=60, batch_size=100)  # Run every 60 seconds, process in batches of 50
     c.start()

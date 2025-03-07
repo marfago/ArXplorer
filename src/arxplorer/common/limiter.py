@@ -24,7 +24,7 @@ class RateLimiter:
                 time.sleep(sl)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     rl = RateLimiter(10, 10)
     while True:
         rl.get_token()

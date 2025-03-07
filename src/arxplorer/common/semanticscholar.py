@@ -40,7 +40,7 @@ def get_citation_counts(arxiv_ids: List[str]) -> list[tuple[Any, Any]]:
     return [(id, count) for (id, count) in zip(arxiv_ids, counts)]
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     # Example usage:
     arxiv_ids = ["2104.08653", "2106.15928", "2104.08653", "2106.15928"]
     citation_counts = get_citation_counts(arxiv_ids)
