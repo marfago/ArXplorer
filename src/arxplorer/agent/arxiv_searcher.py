@@ -113,7 +113,7 @@ class ArxivSearcher(dspy.Module):
             return [to_pydantic_model(paper) for paper in papers]
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     logging.basicConfig(level=logging.INFO)
     instrument_telemetry()
     load_env()

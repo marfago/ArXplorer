@@ -108,7 +108,7 @@ class ArxivReferenceExtractor(dspy.Module):
             return prediction.references
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     logging.basicConfig(level=logging.INFO)
     instrument_telemetry()
     load_env()

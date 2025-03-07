@@ -433,7 +433,7 @@ class DbOperations:
 
 
 # Usage example
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     db_file = "research_db.sqlite"
 
     DbManager().initialize(f"sqlite:///{db_file}")
